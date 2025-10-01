@@ -16,7 +16,7 @@ Single-file **HTML + Tailwind + JS** UTM builder. Live preview, one-click copy, 
 1. Download `index.html`.
 2. Open it in your browser — done.
 
-## 🛠 Development
+##  Development
 No build steps. Tailwind via CDN. Edit `index.html`.
 
 ##  Deploy (GitHub Pages)
