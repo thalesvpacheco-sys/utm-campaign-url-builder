@@ -12,10 +12,6 @@ Single-file **HTML + Tailwind + JS** UTM builder. Live preview, one-click copy, 
 - Quick QR code (Google Charts)
 - Dark, responsive UI (Tailwind CDN)
 
-##  Getting started
-1. Download `index.html`.
-2. Open it in your browser — done.
-
 ##  Development
 No build steps. Tailwind via CDN. Edit `index.html`.
 
