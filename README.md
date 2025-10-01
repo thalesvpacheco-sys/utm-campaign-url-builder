@@ -15,5 +15,5 @@ Single-file **HTML + Tailwind + JS** UTM builder. Live preview, one-click copy, 
 ##  Development
 No build steps. Tailwind via CDN. 
 
-## 👤 Author
+##  Author
 Thales Pacheco — Grifo Agency
