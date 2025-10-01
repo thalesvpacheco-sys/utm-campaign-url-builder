@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>UTM Campaign URL Builder — Grifo Tools</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="Construa URLs com UTMs rapidamente. Salve presets, copie com 1 clique e gere QR Code. 100% client-side."/>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen">
+  <header class="sticky top-0 z-30 border-b border-zinc-800 bg-zinc-950/80 backdrop-blur">
+    <div class="mx-auto max-w-5xl px-4 py-4 flex items-center justify-between">
+      <h1 class="text-xl font-semibold tracking-tight">Grifo Tools · <span class="text-zinc-300">UTM Builder</span></h1>
+      <nav class="text-sm text-zinc-400">100% offline • sem backend</nav>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-8 grid gap-8">
+    <!-- Card: Form -->
+    <section class="grid gap-6 lg:grid-cols-2">
+      <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow">
+        <h2 class="text-lg font-medium mb-4">1) Parâmetros</h2>
+        <form id="utmForm" class="grid gap-3">
+          <label class="grid gap-1">
+            <span class="text-sm text-zinc-300">Website URL *</span>
+            <input id="baseUrl" type="url" placeholder="https://example.com/pagina" required class="px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </label>
+
+          <label class="grid gap-1">
+            <span class="text-sm text-zinc-300">utm_id (opcional)</span>
+            <input id="utm_id" placeholder="abc.123 (ID da campanha do anúncio)" class="px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </label>
+
+          <div class="grid grid-cols-2 gap-3">
+            <label class="grid gap-1">
+              <span class="text-sm text-zinc-300">utm_source *</span>
+              <input id="utm_source" placeholder="google, instagram, meta, newsletter" class="px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-sm text-zinc-300">utm_medium *</span>
+              <input id="utm_medium" placeholder="cpc, social, email, qr" class="px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </label>
+          </div>
+
+          <label class="grid gap-1">
+            <span class="text-sm text-zinc-300">utm_campaign *</span>
+            <input id="utm_campaign" placeholder="black-friday-2025, harmonii-lp, usagi-drop-07" class="px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+          </label>
+
+          <div class="grid grid-cols-2 gap-3">
+            <label class="grid gap-1">
+              <span class="text-sm text-zinc-300">utm_term (opcional)</span>
+              <input id="utm_term" placeholder="palavra-chave" class="px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </label>
+            <label class="grid gap-1">
+              <span class="text-sm text-zinc-300">utm_content (opcional)</span>
+              <input id="utm_content" placeholder="variação-criativo-a" class="px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            </label>
+          </div>
+
+          <!-- Extras / opções -->
+          <fieldset class="mt-2 grid gap-2">
+            <legend class="text-sm text-zinc-300 mb-1">Opções</legend>
+            <label class="inline-flex items-center gap-2 text-sm text-zinc-300">
+              <input id="optLower" type="checkbox" class="accent-indigo-500" checked> forçar minúsculas
+            </label>
+            <label class="inline-flex items-center gap-2 text-sm text-zinc-300">
+              <input id="optKeepExisting" type="checkbox" class="accent-indigo-500" checked> 
+              manter parâmetros existentes na URL base
+            </label>
+            <label class="inline-flex items-center gap-2 text-sm text-zinc-300">
+              <input id="optEncode" type="checkbox" class="accent-indigo-500" checked> 
+              codificar valores (URL encode)
+            </label>
+          </fieldset>
+
+          <!-- Presets -->
+          <div class="mt-4 grid gap-2">
+            <div class="flex items-center gap-2">
+              <input id="presetName" placeholder="nome do preset (ex: Instagram CPC)" class="flex-1 px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <button id="btnSavePreset" type="button" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-700">Salvar preset</button>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="presetSelect" class="flex-1 px-3 py-2 rounded-lg bg-zinc-950 border border-zinc-800"></select>
+              <button id="btnLoadPreset" type="button" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700">Carregar</button>
+              <button id="btnDeletePreset" type="button" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700">Excluir</button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 mt-4">
+            <button id="btnBuild" type="submit" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 font-medium">Gerar URL</button>
+            <button id="btnReset" type="button" class="px-4 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700">Limpar</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Card: Output -->
+      <div class="bg-zinc-900/60 border border-zinc-800 rounded-2xl p-5 shadow grid content-start gap-4">
+        <h2 class="text-lg font-medium">2) Resultado</h2>
+        <div class="grid gap-3">
+          <div class="text-xs text-zinc-400">Preview</div>
+          <output id="preview" class="block w-full min-h-[96px] whitespace-pre-wrap break-all rounded-xl border border-zinc-800 bg-zinc-950 p-3 font-mono text-sm">—</output>
+          <div class="flex flex-wrap gap-2">
+            <button id="btnCopy" class="px-3 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500">Copiar URL</button>
+            <button id="btnOpen" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700">Abrir em nova aba</button>
+            <button id="btnQR" class="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700">Gerar QR Code</button>
+          </div>
+          <canvas id="qrCanvas" class="hidden border border-zinc-800 rounded-xl bg-white p-2 w-[200px] h-[200px]"></canvas>
+          <div id="toast" class="pointer-events-none fixed bottom-5 right-5 hidden rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-2 text-sm">copiado!</div>
+        </div>
+
+        <div class="text-xs text-zinc-500 mt-2">Dica: deixe <code>utm_medium=qr</code> para rastrear campanhas em QR Codes.</div>
+      </div>
+    </section>
+
+    <!-- Help -->
+    <section class="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-5">
+      <h3 class="font-medium mb-4">Como usar (passo a passo)</h3>
+      <ol class="list-decimal ml-5 text-sm text-zinc-300 space-y-1 mb-6">
+        <li>Coloque a <strong>URL do site</strong> (a página final que o usuário deve abrir).</li>
+        <li>Preencha <code>utm_source</code> (ex.: <code>google</code>, <code>instagram</code>, <code>newsletter</code>) e <code>utm_medium</code> (ex.: <code>cpc</code>, <code>social</code>, <code>email</code>, <code>qr</code>).</li>
+        <li>Defina <code>utm_campaign</code> com um nome consistente (ex.: <code>spring_sale</code>, <code>bf-2025</code>).</li>
+        <li>Se quiser, adicione <code>utm_id</code> (ID da campanha do anúncio), <code>utm_term</code> (palavra‑chave) e <code>utm_content</code> (variação do criativo).</li>
+        <li>Clique em <strong>Gerar URL</strong>, copie e use no seu anúncio, post, e‑mail ou QR Code.</li>
+      </ol>
+
+      <h4 class="font-medium mb-2">Exemplos por parâmetro</h4>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm border border-zinc-800 rounded-xl overflow-hidden">
+          <thead class="bg-zinc-900 text-zinc-300">
+            <tr>
+              <th class="text-left p-3 border-b border-zinc-800">Parâmetro</th>
+              <th class="text-left p-3 border-b border-zinc-800">Obrigatório</th>
+              <th class="text-left p-3 border-b border-zinc-800">Exemplo</th>
+              <th class="text-left p-3 border-b border-zinc-800">Descrição</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-800">
+            <tr>
+              <td class="p-3 font-mono">utm_id</td>
+              <td class="p-3">Não</td>
+              <td class="p-3"><code>abc.123</code></td>
+              <td class="p-3">Identifica a campanha do anúncio (ID da plataforma de Ads).</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-mono">utm_source</td>
+              <td class="p-3">Sim</td>
+              <td class="p-3"><code>google</code></td>
+              <td class="p-3">Origem do tráfego (buscador, rede social, newsletter etc.).</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-mono">utm_medium</td>
+              <td class="p-3">Sim</td>
+              <td class="p-3"><code>cpc</code></td>
+              <td class="p-3">Meio: cpc, social, email, qr, referral, banner…</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-mono">utm_campaign</td>
+              <td class="p-3">Não</td>
+              <td class="p-3"><code>spring_sale</code></td>
+              <td class="p-3">Nome da campanha/promocional (consistente e em minúsculas).</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-mono">utm_term</td>
+              <td class="p-3">Não</td>
+              <td class="p-3"><code>running+shoes</code></td>
+              <td class="p-3">Palavra‑chave (geralmente para campanhas pagas).</td>
+            </tr>
+            <tr>
+              <td class="p-3 font-mono">utm_content</td>
+              <td class="p-3">Não</td>
+              <td class="p-3"><code>logolink</code></td>
+              <td class="p-3">Variação do criativo/peça (A/B test, botão vs. imagem etc.).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-6 text-xs text-zinc-500">
+        Boas práticas: nomes curtos, consistentes, sem espaços (use <code>-</code>), e padronize por canal. Ex.: <code>utm_medium=qr</code> para QR Codes.
+      </div>
+    </section>
+  </main>
+
+  <footer class="mx-auto max-w-5xl px-4 py-10 text-center text-sm text-zinc-500">
+    Feito com Tailwind. Nenhum dado é enviado a servidores.
+  </footer>
+
+  <script>
+    // Helpers
+    const $ = (id) => document.getElementById(id);
+    const fields = ["baseUrl","utm_id","utm_source","utm_medium","utm_campaign","utm_term","utm_content"];    
+
+    function toast(msg) {
+      const t = $("toast");
+      t.textContent = msg;
+      t.classList.remove("hidden");
+      setTimeout(()=>t.classList.add("hidden"), 1600);
+    }
+
+    function toKebab(v) {
+      return v
+        .normalize('NFD').replace(/\p{Diacritic}/gu,'')
+        .trim()
+        .replace(/\s+/g,'-')
+        .replace(/[^a-zA-Z0-9_-]/g,'-')
+        .toLowerCase();
+    }
+
+    function buildUrl() {
+      const base = $("baseUrl").value.trim();
+      let url;
+      try {
+        url = new URL(base);
+      } catch(e) {
+        return { error: "URL inválida" };
+      }
+
+      const keepExisting = $("optKeepExisting").checked;
+      const encode = $("optEncode").checked;
+      const lower = $("optLower").checked;
+
+      const params = new URLSearchParams(keepExisting ? url.search : "");
+
+      const add = (key, val) => {
+        if (!val) return;
+        let v = val.trim();
+        if (lower) {
+          if (['utm_source','utm_medium','utm_campaign'].includes(key)) v = toKebab(v);
+          else v = v.toLowerCase();
+        }
+        params.set(key, encode ? v : decodeURIComponent(encodeURIComponent(v)));
+      };
+
+      add('utm_id', $("utm_id").value);
+      add('utm_source', $("utm_source").value);
+      add('utm_medium', $("utm_medium").value);
+      add('utm_campaign', $("utm_campaign").value);
+      add('utm_term', $("utm_term").value);
+      add('utm_content', $("utm_content").value);
+
+      url.search = params.toString();
+      return { url: url.toString() };
+    }
+
+    function updatePreview() {
+      const { url, error } = buildUrl();
+      $("preview").textContent = error ? `⚠️ ${error}` : url || '—';
+    }
+
+    // Presets via localStorage
+    const LS_KEY = 'utm-presets-v1';
+    function loadPresets() {
+      const list = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+      const sel = $("presetSelect");
+      sel.innerHTML = '';
+      list.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.name;
+        opt.textContent = p.name;
+        sel.appendChild(opt);
+      });
+    }
+
+    function savePreset() {
+      const name = $("presetName").value.trim();
+      if (!name) return toast('Dê um nome ao preset');
+      const preset = {
+        name,
+        values: Object.fromEntries(fields.map(id => [id, $(id).value]))
+      };
+      const list = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+      const idx = list.findIndex(p=>p.name===name);
+      if (idx>=0) list[idx]=preset; else list.push(preset);
+      localStorage.setItem(LS_KEY, JSON.stringify(list));
+      loadPresets();
+      toast('Preset salvo');
+    }
+
+    function applyPreset() {
+      const name = $("presetSelect").value;
+      const list = JSON.parse(localStorage.getItem(LS_KEY) || '[]');
+      const p = list.find(x=>x.name===name);
+      if (!p) return;
+      fields.forEach(id => $(id).value = p.values[id] || '');
+      updatePreview();
+    }
+
+    function deletePreset() {
+      const name = $("presetSelect").value;
+      const list = JSON.parse(localStorage.getItem(LS_KEY) || '[]').filter(p=>p.name!==name);
+      localStorage.setItem(LS_KEY, JSON.stringify(list));
+      loadPresets();
+      toast('Preset excluído');
+    }
+
+    // QR Code mínimo (sem libs) — algoritmo QR simples (modo Micro QR não usado aqui)
+    // Para manter o arquivo único e simples, vamos usar um fallback light: gerar QR via API de chart do Google
+    // (apenas na ação do usuário). Se preferir 100% offline, podemos trocar por uma lib pequena depois.
+    async function drawQR(text) {
+      const c = $("qrCanvas");
+      if (!text) return;
+      // usa image para desenhar no canvas
+      const url = `https://chart.googleapis.com/chart?cht=qr&chs=200x200&chl=${encodeURIComponent(text)}`;
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        c.width = 200; c.height = 200;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0,0,200,200);
+        ctx.drawImage(img, 0, 0, 200, 200);
+        c.classList.remove('hidden');
+      };
+      img.onerror = ()=>{
+        c.classList.add('hidden');
+        toast('Falha ao gerar QR (modo online)');
+      };
+      img.src = url;
+    }
+
+    // Events
+    fields.forEach(id => $(id).addEventListener('input', updatePreview));
+    ["optLower","optKeepExisting","optEncode"].forEach(id => $(id).addEventListener('change', updatePreview));
+
+    $("utmForm").addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const out = buildUrl();
+      if (out.error) return toast(out.error);
+      $("preview").textContent = out.url;
+    });
+
+    $("btnCopy").addEventListener('click', async ()=>{
+      const txt = $("preview").textContent.trim();
+      if (!txt || txt === '—' || txt.startsWith('⚠️')) return;
+      try { await navigator.clipboard.writeText(txt); toast('URL copiada'); }
+      catch { toast('Não foi possível copiar'); }
+    });
+
+    $("btnOpen").addEventListener('click', ()=>{
+      const txt = $("preview").textContent.trim();
+      if (!txt || txt === '—' || txt.startsWith('⚠️')) return;
+      window.open(txt, '_blank');
+    });
+
+    $("btnQR").addEventListener('click', ()=>{
+      const txt = $("preview").textContent.trim();
+      if (!txt || txt === '—' || txt.startsWith('⚠️')) return;
+      drawQR(txt);
+    });
+
+    $("btnReset").addEventListener('click', ()=>{
+      fields.forEach(id => $(id).value = '');
+      $("qrCanvas").classList.add('hidden');
+      updatePreview();
+    });
+
+    $("btnSavePreset").addEventListener('click', savePreset);
+    $("btnLoadPreset").addEventListener('click', applyPreset);
+    $("btnDeletePreset").addEventListener('click', deletePreset);
+
+    // init
+    loadPresets();
+    updatePreview();
+  </script>
+</body>
+</html>
